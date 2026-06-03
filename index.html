@@ -1,0 +1,857 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Simulador: À vista x Parcelado</title>
+    <style>
+:root {
+  color-scheme: light;
+  --bg: #f5f1e8;
+  --surface: #fffdf8;
+  --surface-strong: #ffffff;
+  --ink: #1e2430;
+  --muted: #6b7280;
+  --line: #ded4c1;
+  --line-soft: #ece4d6;
+  --navy: #102f4f;
+  --navy-2: #173f66;
+  --gold: #bd922b;
+  --gold-2: #ddc27b;
+  --input: #f1d676;
+  --positive: #1d6d4b;
+  --positive-bg: #e8f3ec;
+  --negative: #9b3c34;
+  --negative-bg: #f7e9e5;
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(circle at top left, rgba(189, 146, 43, 0.13), transparent 360px),
+    linear-gradient(180deg, #fbf8ef 0, var(--bg) 100%);
+  color: var(--ink);
+}
+
+input,
+button {
+  font: inherit;
+}
+
+.app-shell {
+  min-height: 100svh;
+  padding: 28px;
+}
+
+.workspace {
+  width: min(1280px, 100%);
+  margin: 0 auto;
+}
+
+.topbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 24px;
+  align-items: end;
+  padding: 24px 0 22px;
+  border-bottom: 1px solid rgba(16, 47, 79, 0.18);
+  animation: rise-in 280ms ease-out both;
+}
+
+.eyebrow,
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+.eyebrow {
+  margin-bottom: 5px;
+  color: var(--gold);
+  font-size: 0.74rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+h1 {
+  color: var(--navy);
+  font-size: clamp(1.8rem, 3.6vw, 3.65rem);
+  line-height: 0.96;
+  letter-spacing: 0;
+}
+
+.intro {
+  max-width: 640px;
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 0.98rem;
+  line-height: 1.45;
+}
+
+h2 {
+  color: var(--navy);
+  font-size: 0.98rem;
+  letter-spacing: 0;
+}
+
+.summary-pill {
+  min-width: 108px;
+  border: 1px solid var(--line);
+  background: var(--surface-strong);
+  padding: 10px 14px;
+  text-align: center;
+  color: var(--navy);
+  font-size: 0.86rem;
+  font-weight: 850;
+  box-shadow: 0 12px 30px rgba(16, 47, 79, 0.08);
+}
+
+.summary-pill.positive,
+.decision-stat.positive {
+  border-color: rgba(29, 109, 75, 0.32);
+  background: linear-gradient(180deg, #f2fbf5, var(--positive-bg));
+  color: var(--positive);
+}
+
+.summary-pill.negative,
+.decision-stat.negative {
+  border-color: rgba(155, 60, 52, 0.3);
+  background: linear-gradient(180deg, #fff6f4, var(--negative-bg));
+  color: var(--negative);
+}
+
+.decision-strip {
+  display: grid;
+  grid-template-columns: minmax(300px, 1fr) minmax(150px, 210px) minmax(140px, 190px);
+  margin-top: 18px;
+  overflow: hidden;
+  border: 1px solid rgba(16, 47, 79, 0.12);
+  background: var(--surface-strong);
+  box-shadow: 0 18px 52px rgba(16, 47, 79, 0.1);
+  animation: rise-in 340ms 60ms ease-out both;
+}
+
+.decision-copy {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-2) 100%);
+  padding: 22px 24px;
+  color: white;
+}
+
+.decision-copy .label,
+.decision-copy p {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.decision-copy strong {
+  display: block;
+  margin: 7px 0 8px;
+  font-size: 1.34rem;
+  line-height: 1.15;
+}
+
+.decision-copy p,
+.section-heading p {
+  font-size: 0.9rem;
+  line-height: 1.42;
+}
+
+.decision-stat {
+  display: flex;
+  min-height: 118px;
+  flex-direction: column;
+  justify-content: center;
+  border-left: 1px solid var(--line-soft);
+  background: var(--surface-strong);
+  padding: 18px;
+}
+
+.decision-stat span,
+.metric span,
+.miles-grid span {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 850;
+  line-height: 1.15;
+  text-transform: uppercase;
+}
+
+.decision-stat strong {
+  font-size: 1.4rem;
+  line-height: 1.05;
+}
+
+.decision-stat.emphasis strong {
+  font-size: 1.65rem;
+}
+
+.decision-stat.emphasis.positive strong {
+  color: var(--positive);
+}
+
+.decision-stat.emphasis.negative strong {
+  color: var(--negative);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: minmax(300px, 370px) minmax(0, 1fr);
+  gap: 26px;
+  margin-top: 28px;
+  align-items: start;
+}
+
+.inputs-panel,
+.results-panel,
+.simulation-section {
+  border-top: 2px solid var(--navy);
+  animation: rise-in 360ms 110ms ease-out both;
+}
+
+.section-heading {
+  padding: 15px 0 13px;
+}
+
+.section-heading p {
+  margin-top: 3px;
+  color: var(--muted);
+}
+
+.section-heading.compact {
+  padding-top: 0;
+}
+
+.section-heading.inline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.small-status {
+  border: 1px solid var(--line);
+  background: var(--surface-strong);
+  padding: 8px 12px;
+  color: var(--navy);
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.field {
+  display: grid;
+  grid-template-columns: minmax(150px, 1fr) minmax(108px, 132px);
+  gap: 12px;
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  padding: 9px 0;
+}
+
+.field span {
+  color: var(--ink);
+  font-size: 0.88rem;
+  font-weight: 740;
+}
+
+.field input {
+  width: 100%;
+  border: 1px solid #d0aa44;
+  background: var(--input);
+  padding: 8px 10px;
+  color: var(--navy);
+  font-size: 0.92rem;
+  font-weight: 850;
+  text-align: right;
+  outline: none;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    background 150ms ease;
+}
+
+.field input:focus {
+  border-color: var(--gold);
+  background: #f5dc7e;
+  box-shadow: 0 0 0 3px rgba(189, 146, 43, 0.18);
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(124px, 1fr));
+  gap: 1px;
+  border: 1px solid var(--line);
+  background: var(--line);
+  box-shadow: 0 16px 42px rgba(16, 47, 79, 0.06);
+}
+
+.metric {
+  min-height: 102px;
+  background: var(--surface-strong);
+  padding: 16px;
+}
+
+.metric.primary {
+  background: #fcfaf4;
+}
+
+.metric strong {
+  color: var(--ink);
+  font-size: 1.18rem;
+  line-height: 1.1;
+}
+
+.miles-panel {
+  margin-top: 28px;
+  border: 1px solid #cfbd92;
+  background: #fffaf0;
+  padding: 16px;
+  box-shadow: 0 14px 34px rgba(16, 47, 79, 0.05);
+}
+
+.miles-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  border: 1px solid var(--line);
+  background: var(--line);
+}
+
+.miles-grid > div {
+  min-height: 88px;
+  background: var(--surface-strong);
+  padding: 14px;
+}
+
+.miles-grid strong {
+  color: var(--navy);
+  font-size: 1.12rem;
+  line-height: 1.1;
+}
+
+.simulation-section {
+  margin-top: 30px;
+  background: rgba(255, 253, 248, 0.64);
+  padding-top: 2px;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  border-top: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.4);
+}
+
+table {
+  width: 100%;
+  min-width: 940px;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  border-bottom: 1px solid var(--line);
+  padding: 9px 9px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+th {
+  color: var(--muted);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+}
+
+td {
+  font-size: 0.84rem;
+}
+
+th:first-child,
+td:first-child {
+  text-align: center;
+}
+
+td:last-child,
+th:last-child {
+  text-align: center;
+}
+
+tbody tr:hover {
+  background: rgba(189, 146, 43, 0.08);
+}
+
+.row-tag {
+  display: inline-block;
+  min-width: 108px;
+  padding: 5px 7px;
+  font-size: 0.76rem;
+  font-weight: 850;
+}
+
+.row-tag.positive {
+  background: var(--positive-bg);
+  color: var(--positive);
+}
+
+.row-tag.negative {
+  background: var(--negative-bg);
+  color: var(--negative);
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 1080px) {
+  .grid,
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .miles-panel {
+    margin-top: 24px;
+  }
+}
+
+@media (max-width: 760px) {
+  .app-shell {
+    padding: 16px;
+  }
+
+  .topbar,
+  .section-heading.inline {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  .decision-strip,
+  .miles-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .decision-stat {
+    border-left: 0;
+    border-top: 1px solid var(--line-soft);
+  }
+
+  .field {
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+}
+
+    </style>
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="workspace" aria-label="Simulador de pagamento">
+        <header class="topbar">
+          <div class="title-lockup">
+            <p class="eyebrow">Calculadora financeira</p>
+            <h1>À vista ou parcelado?</h1>
+            <p class="intro">
+              Compare desconto, rendimento da aplicação e valor estimado das milhas em uma leitura única.
+            </p>
+          </div>
+          <div class="summary-pill negative" id="topRecommendation">À vista</div>
+        </header>
+
+        <section class="decision-strip" aria-label="Resultado principal">
+          <div class="decision-copy">
+            <span class="label">Recomendação</span>
+            <strong id="recommendationTitle">Compensa pagar à vista</strong>
+            <p id="recommendationMessage">
+              Neste cenário, compensa pagar à vista, porque o desconto supera a soma da aplicação com o valor estimado das milhas.
+            </p>
+          </div>
+          <div class="decision-stat emphasis">
+            <span>Diferença final</span>
+            <strong id="difference">-R$ 11,81</strong>
+          </div>
+          <div class="decision-stat">
+            <span>Desconto mínimo</span>
+            <strong id="minimumDiscount">7,44%</strong>
+          </div>
+        </section>
+
+        <section class="grid">
+          <form class="inputs-panel" id="simulatorForm">
+            <div class="section-heading">
+              <h2>Campos de entrada</h2>
+              <p>Edite os campos amarelos. O restante atualiza sozinho.</p>
+            </div>
+
+            <label class="field">
+              <span>Valor da compra / parcelado</span>
+              <input id="purchaseValue" type="text" inputmode="decimal" value="10.886,72" />
+            </label>
+
+            <label class="field">
+              <span>Desconto à vista em %</span>
+              <input id="cashDiscountPercent" type="text" inputmode="decimal" value="10,00" />
+            </label>
+
+            <label class="field">
+              <span>Número de parcelas</span>
+              <input id="installments" type="number" min="1" max="60" step="1" value="12" />
+            </label>
+
+            <label class="field">
+              <span>Rentabilidade mensal estimada</span>
+              <input id="monthlyReturn" type="text" inputmode="decimal" value="1,21" />
+            </label>
+
+            <label class="field">
+              <span>Impostos/taxas sobre rendimento</span>
+              <input id="taxRate" type="text" inputmode="decimal" value="0,00" />
+            </label>
+
+            <label class="field">
+              <span>Cotação média do dólar</span>
+              <input id="dollarRate" type="text" inputmode="decimal" value="5,00" />
+            </label>
+
+            <label class="field">
+              <span>Pontos por dólar gasto</span>
+              <input id="pointsPerDollar" type="text" inputmode="decimal" value="2,00" />
+            </label>
+
+            <label class="field">
+              <span>Bônus na transferência (%)</span>
+              <input id="transferBonus" type="text" inputmode="decimal" value="80,00" />
+            </label>
+
+            <label class="field">
+              <span>Valor do milheiro</span>
+              <input id="mileThousandValue" type="text" inputmode="decimal" value="18,00" />
+            </label>
+          </form>
+
+          <section class="results-panel" aria-label="Resultados automáticos">
+            <div class="section-heading">
+              <h2>Resultado automático</h2>
+              <p>Compara desconto à vista contra saldo aplicado no parcelado + valor estimado das milhas.</p>
+            </div>
+
+            <div class="metrics-grid">
+              <div class="metric primary">
+                <span>Total à vista</span>
+                <strong id="cashTotal">R$ 9.798,05</strong>
+              </div>
+              <div class="metric primary">
+                <span>Total parcelado</span>
+                <strong id="installmentTotal">R$ 10.886,76</strong>
+              </div>
+              <div class="metric primary">
+                <span>Parcela usada</span>
+                <strong id="usedInstallment">R$ 907,23</strong>
+              </div>
+              <div class="metric">
+                <span>Saldo final aplicação</span>
+                <strong id="finalBalance">R$ 935,77</strong>
+              </div>
+              <div class="metric">
+                <span>Desconto à vista</span>
+                <strong id="actualDiscount">R$ 1.088,67</strong>
+              </div>
+            </div>
+
+            <section class="miles-panel" aria-label="Cálculo de pontos e milhas">
+              <div class="section-heading compact">
+                <h2>Pontos e milhas</h2>
+                <p>Estimativa considerada na vantagem do parcelado.</p>
+              </div>
+
+              <div class="miles-grid">
+                <div>
+                  <span>Pontos gerados</span>
+                  <strong id="generatedPoints">4.355</strong>
+                </div>
+                <div>
+                  <span>Milhas com bônus</span>
+                  <strong id="bonusMiles">7.838</strong>
+                </div>
+                <div>
+                  <span>Valor estimado</span>
+                  <strong id="milesValue">R$ 141,09</strong>
+                </div>
+              </div>
+            </section>
+          </section>
+        </section>
+
+        <section class="simulation-section" aria-label="Simulação mês a mês">
+          <div class="section-heading inline">
+            <div>
+              <h2>Simulação mês a mês</h2>
+              <p>Mostra o saldo aplicado, rendimento e saque das parcelas ao longo do prazo.</p>
+            </div>
+            <div class="small-status" id="rowCount">12 meses</div>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Mês</th>
+                  <th>Saldo inicial</th>
+                  <th>Rendimento bruto</th>
+                  <th>Impostos/taxas</th>
+                  <th>Rendimento líquido</th>
+                  <th>Parcela paga</th>
+                  <th>Saldo final</th>
+                  <th>Diferença real</th>
+                  <th>Recomendação</th>
+                </tr>
+              </thead>
+              <tbody id="simulationRows"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script>
+const BRL = new Intl.NumberFormat("pt-BR", {
+  style: "currency",
+  currency: "BRL",
+});
+
+const percent = new Intl.NumberFormat("pt-BR", {
+  style: "percent",
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
+const decimal = new Intl.NumberFormat("pt-BR", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
+const state = {
+  purchaseValue: document.querySelector("#purchaseValue"),
+  cashDiscountPercent: document.querySelector("#cashDiscountPercent"),
+  installments: document.querySelector("#installments"),
+  monthlyReturn: document.querySelector("#monthlyReturn"),
+  taxRate: document.querySelector("#taxRate"),
+  dollarRate: document.querySelector("#dollarRate"),
+  pointsPerDollar: document.querySelector("#pointsPerDollar"),
+  transferBonus: document.querySelector("#transferBonus"),
+  mileThousandValue: document.querySelector("#mileThousandValue"),
+};
+
+const output = {
+  topRecommendation: document.querySelector("#topRecommendation"),
+  recommendationTitle: document.querySelector("#recommendationTitle"),
+  recommendationMessage: document.querySelector("#recommendationMessage"),
+  difference: document.querySelector("#difference"),
+  minimumDiscount: document.querySelector("#minimumDiscount"),
+  cashTotal: document.querySelector("#cashTotal"),
+  installmentTotal: document.querySelector("#installmentTotal"),
+  usedInstallment: document.querySelector("#usedInstallment"),
+  finalBalance: document.querySelector("#finalBalance"),
+  actualDiscount: document.querySelector("#actualDiscount"),
+  generatedPoints: document.querySelector("#generatedPoints"),
+  bonusMiles: document.querySelector("#bonusMiles"),
+  milesValue: document.querySelector("#milesValue"),
+  simulationRows: document.querySelector("#simulationRows"),
+  rowCount: document.querySelector("#rowCount"),
+  decisionStrip: document.querySelector(".decision-strip"),
+};
+
+function parseNumber(value) {
+  if (!value || String(value).trim() === "") return null;
+  const normalized = String(value)
+    .replace(/[^\d,.-]/g, "")
+    .replace(/\./g, "")
+    .replace(",", ".");
+  const parsed = Number(normalized);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function roundMoney(value) {
+  return Math.round((value + Number.EPSILON) * 100) / 100;
+}
+
+function asRate(value) {
+  const parsed = parseNumber(value);
+  if (parsed === null) return 0;
+  return parsed > 1 ? parsed / 100 : parsed;
+}
+
+function formatInput(input, mode = "decimal") {
+  const parsed = parseNumber(input.value);
+  if (parsed === null) return;
+  if (mode === "integer") {
+    input.value = String(Math.max(1, Math.round(parsed)));
+    return;
+  }
+  input.value = decimal.format(parsed);
+}
+
+function getInputs() {
+  const purchaseValue = parseNumber(state.purchaseValue.value) ?? 0;
+  const discountPercent = asRate(state.cashDiscountPercent.value);
+  const installments = Math.max(1, Math.min(60, Number(state.installments.value) || 1));
+  const monthlyReturn = asRate(state.monthlyReturn.value);
+  const taxRate = asRate(state.taxRate.value);
+  const dollarRate = parseNumber(state.dollarRate.value) || 5;
+  const pointsPerDollar = parseNumber(state.pointsPerDollar.value) ?? 0;
+  const transferBonus = asRate(state.transferBonus.value);
+  const mileThousandValue = parseNumber(state.mileThousandValue.value) ?? 0;
+
+  const cashTotal = roundMoney(purchaseValue - purchaseValue * discountPercent);
+  const actualDiscount = roundMoney(purchaseValue - cashTotal);
+  const usedInstallment = roundMoney(purchaseValue / installments);
+  const installmentTotal = roundMoney(usedInstallment * installments);
+  const generatedPoints = purchaseValue && dollarRate ? purchaseValue / dollarRate * pointsPerDollar : 0;
+  const bonusMiles = generatedPoints * (1 + transferBonus);
+  const milesValue = roundMoney((bonusMiles / 1000) * mileThousandValue);
+
+  return {
+    purchaseValue,
+    installments,
+    monthlyReturn,
+    taxRate,
+    cashTotal,
+    actualDiscount,
+    usedInstallment,
+    installmentTotal,
+    generatedPoints,
+    bonusMiles,
+    milesValue,
+    netRate: monthlyReturn - taxRate,
+  };
+}
+
+function calculateRows(inputs) {
+  const rows = [];
+  let previousBalance = inputs.installmentTotal;
+
+  for (let month = 1; month <= inputs.installments; month += 1) {
+    const initialBalance = roundMoney(month === 1 ? inputs.installmentTotal : previousBalance);
+    const grossYield = roundMoney(initialBalance * inputs.monthlyReturn);
+    const taxes = roundMoney(grossYield * inputs.taxRate);
+    const netYield = roundMoney(grossYield - taxes);
+    const finalBalance = roundMoney(initialBalance + netYield - inputs.usedInstallment);
+    const paidInstallments = roundMoney(month * inputs.usedInstallment);
+
+    rows.push({
+      month,
+      initialBalance,
+      grossYield,
+      taxes,
+      netYield,
+      paidInstallments,
+      finalBalance,
+      realDifference: roundMoney(finalBalance + inputs.milesValue - inputs.actualDiscount),
+      recommendation:
+        finalBalance + inputs.milesValue - inputs.actualDiscount > 0
+          ? "Parcelado melhor"
+          : "À vista melhor",
+    });
+
+    previousBalance = finalBalance;
+  }
+
+  return rows;
+}
+
+function minimumDiscount(inputs) {
+  if (!inputs.purchaseValue) return 0;
+  if (inputs.netRate === 0) {
+    return 1 - inputs.installmentTotal / inputs.purchaseValue;
+  }
+  const presentValue =
+    (inputs.usedInstallment * (1 - (1 + inputs.netRate) ** -inputs.installments)) /
+    inputs.netRate;
+  return 1 - presentValue / inputs.purchaseValue;
+}
+
+function setStateClass(element, isPositive) {
+  element.classList.toggle("positive", isPositive);
+  element.classList.toggle("negative", !isPositive);
+}
+
+function render() {
+  const inputs = getInputs();
+  const rows = calculateRows(inputs);
+  const lastRow = rows[rows.length - 1];
+  const finalBalance = lastRow?.finalBalance ?? 0;
+  const diff = roundMoney(finalBalance + inputs.milesValue - inputs.actualDiscount);
+  const isPositive = diff > 0;
+  const recommendation = isPositive ? "Parcelado" : "À vista";
+  const message = isPositive
+    ? "Neste cenário, compensa parcelar, porque a soma da aplicação com o valor estimado das milhas supera o desconto à vista."
+    : "Neste cenário, compensa pagar à vista, porque o desconto supera a soma da aplicação com o valor estimado das milhas.";
+
+  output.topRecommendation.textContent = recommendation;
+  output.recommendationTitle.textContent = isPositive ? "Compensa parcelar" : "Compensa pagar à vista";
+  output.recommendationMessage.textContent = message;
+  output.difference.textContent = BRL.format(diff);
+  output.minimumDiscount.textContent = percent.format(minimumDiscount(inputs));
+  output.cashTotal.textContent = BRL.format(inputs.cashTotal);
+  output.installmentTotal.textContent = BRL.format(inputs.installmentTotal);
+  output.usedInstallment.textContent = BRL.format(inputs.usedInstallment);
+  output.finalBalance.textContent = BRL.format(finalBalance);
+  output.actualDiscount.textContent = BRL.format(inputs.actualDiscount);
+  output.generatedPoints.textContent = Math.round(inputs.generatedPoints).toLocaleString("pt-BR");
+  output.bonusMiles.textContent = Math.round(inputs.bonusMiles).toLocaleString("pt-BR");
+  output.milesValue.textContent = BRL.format(inputs.milesValue);
+  output.rowCount.textContent = `${inputs.installments} ${inputs.installments === 1 ? "mês" : "meses"}`;
+
+  setStateClass(output.topRecommendation, isPositive);
+  setStateClass(output.decisionStrip, isPositive);
+  setStateClass(output.difference.closest(".decision-stat"), isPositive);
+
+  output.simulationRows.innerHTML = rows
+    .map((row) => {
+      const rowPositive = row.realDifference > 0;
+      return `
+        <tr>
+          <td>${row.month}</td>
+          <td>${BRL.format(row.initialBalance)}</td>
+          <td>${BRL.format(row.grossYield)}</td>
+          <td>${BRL.format(row.taxes)}</td>
+          <td>${BRL.format(row.netYield)}</td>
+          <td>${BRL.format(inputs.usedInstallment)}</td>
+          <td>${BRL.format(row.finalBalance)}</td>
+          <td>${BRL.format(row.realDifference)}</td>
+          <td><span class="row-tag ${rowPositive ? "positive" : "negative"}">${row.recommendation}</span></td>
+        </tr>
+      `;
+    })
+    .join("");
+}
+
+for (const input of Object.values(state)) {
+  input.addEventListener("input", render);
+}
+
+state.purchaseValue.addEventListener("blur", () => formatInput(state.purchaseValue));
+state.cashDiscountPercent.addEventListener("blur", () => formatInput(state.cashDiscountPercent));
+state.installments.addEventListener("blur", () => formatInput(state.installments, "integer"));
+state.monthlyReturn.addEventListener("blur", () => formatInput(state.monthlyReturn));
+state.taxRate.addEventListener("blur", () => formatInput(state.taxRate));
+state.dollarRate.addEventListener("blur", () => formatInput(state.dollarRate));
+state.pointsPerDollar.addEventListener("blur", () => formatInput(state.pointsPerDollar));
+state.transferBonus.addEventListener("blur", () => formatInput(state.transferBonus));
+state.mileThousandValue.addEventListener("blur", () => formatInput(state.mileThousandValue));
+
+render();
+
+    </script>
+  </body>
+</html>
