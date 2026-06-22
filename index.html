@@ -459,7 +459,7 @@ tbody tr:hover {
       <section class="workspace" aria-label="Simulador de pagamento">
         <header class="topbar">
           <div class="title-lockup">
-            <p class="eyebrow">Calculadora financeira</p>
+            <p class="eyebrow">Calculadora financeira - Vinicius Dezan Lodi</p>
             <h1>À vista ou parcelado?</h1>
             <p class="intro">
               Compare desconto, rendimento da aplicação e valor estimado das milhas em uma leitura única.
@@ -470,10 +470,10 @@ tbody tr:hover {
 
         <section class="decision-strip" aria-label="Resultado principal">
           <div class="decision-copy">
-            <span class="label">Recomendação</span>
+            <span class="label">Recomendação:</span>
             <strong id="recommendationTitle">Compensa pagar à vista</strong>
             <p id="recommendationMessage">
-              Neste cenário, compensa pagar à vista, porque o desconto supera a soma da aplicação com o valor estimado das milhas.
+              Neste cenário, compensa pagar à vista, pois o desconto é maior que o rendimento acumulado com o valor estimado das milhas.
             </p>
           </div>
           <div class="decision-stat emphasis">
@@ -490,11 +490,11 @@ tbody tr:hover {
           <form class="inputs-panel" id="simulatorForm">
             <div class="section-heading">
               <h2>Campos de entrada</h2>
-              <p>Edite os campos amarelos. O restante atualiza sozinho.</p>
+              <p>Edite os campos AMARELOS. O restante atualiza sozinho!</p>
             </div>
 
             <label class="field">
-              <span>Valor da compra / parcelado</span>
+              <span>Valor da compra/parcelado</span>
               <input id="purchaseValue" type="text" inputmode="decimal" value="10.886,72" />
             </label>
 
@@ -504,7 +504,7 @@ tbody tr:hover {
             </label>
 
             <label class="field">
-              <span>Número de parcelas</span>
+              <span>Número de parcelas que pode fazer?</span>
               <input id="installments" type="number" min="1" max="60" step="1" value="12" />
             </label>
 
@@ -519,17 +519,17 @@ tbody tr:hover {
             </label>
 
             <label class="field">
-              <span>Cotação média do dólar</span>
+              <span>Cotação média do dólar(Para o calculo de milhas)</span>
               <input id="dollarRate" type="text" inputmode="decimal" value="5,00" />
             </label>
 
             <label class="field">
-              <span>Pontos por dólar gasto</span>
+              <span>Pontos por dólar gasto do seu cartão(Para o calculo de milhas)</span>
               <input id="pointsPerDollar" type="text" inputmode="decimal" value="2,00" />
             </label>
 
             <label class="field">
-              <span>Bônus na transferência (%)</span>
+              <span>Bônus na transferência de pontos para milhas em % </span>
               <input id="transferBonus" type="text" inputmode="decimal" value="80,00" />
             </label>
 
@@ -547,7 +547,7 @@ tbody tr:hover {
 
             <div class="metrics-grid">
               <div class="metric primary">
-                <span>Total à vista</span>
+                <span>Total à vista com desconto</span>
                 <strong id="cashTotal">R$ 9.798,05</strong>
               </div>
               <div class="metric primary">
@@ -584,7 +584,7 @@ tbody tr:hover {
                   <strong id="bonusMiles">7.838</strong>
                 </div>
                 <div>
-                  <span>Valor estimado</span>
+                  <span>Valor estimado se vendesse as milhas</span>
                   <strong id="milesValue">R$ 141,09</strong>
                 </div>
               </div>
@@ -596,7 +596,7 @@ tbody tr:hover {
           <div class="section-heading inline">
             <div>
               <h2>Simulação mês a mês</h2>
-              <p>Mostra o saldo aplicado, rendimento e saque das parcelas ao longo do prazo.</p>
+              <p>Mostra o saldo aplicado, rendimento e saque para pagar as parcelas ao longo do prazo.</p>
             </div>
             <div class="small-status" id="rowCount">12 meses</div>
           </div>
