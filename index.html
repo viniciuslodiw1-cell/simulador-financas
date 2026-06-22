@@ -1,4 +1,4 @@
-minimumDiscount<!doctype html>
+<!doctype html>
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
@@ -774,12 +774,6 @@ function minimumDiscount(inputs, finalBalance) {
   const minimumDiscountValue = finalBalance + inputs.milesValue;
   return minimumDiscountValue / inputs.purchaseValue;
 }
-  const presentValue =
-    (inputs.usedInstallment * (1 - (1 + inputs.netRate) ** -inputs.installments)) /
-    inputs.netRate;
-  return 1 - presentValue / inputs.purchaseValue;
-}
-
 function setStateClass(element, isPositive) {
   element.classList.toggle("positive", isPositive);
   element.classList.toggle("negative", !isPositive);
