@@ -1,4 +1,4 @@
-<!doctype html>
+minimumDiscount<!doctype html>
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
@@ -769,11 +769,11 @@ function calculateRows(inputs) {
   return rows;
 }
 
-function minimumDiscount(inputs) {
+function minimumDiscount(inputs, finalBalance) {
   if (!inputs.purchaseValue) return 0;
-  if (inputs.netRate === 0) {
-    return 1 - inputs.installmentTotal / inputs.purchaseValue;
-  }
+  const minimumDiscountValue = finalBalance + inputs.milesValue;
+  return minimumDiscountValue / inputs.purchaseValue;
+}
   const presentValue =
     (inputs.usedInstallment * (1 - (1 + inputs.netRate) ** -inputs.installments)) /
     inputs.netRate;
@@ -801,7 +801,7 @@ function render() {
   output.recommendationTitle.textContent = isPositive ? "Compensa parcelar" : "Compensa pagar à vista";
   output.recommendationMessage.textContent = message;
   output.difference.textContent = BRL.format(diff);
-  output.minimumDiscount.textContent = percent.format(minimumDiscount(inputs));
+  output.minimumDiscount.textContent = percent.format(minimumDiscount(inputs, finalBalance));
   output.cashTotal.textContent = BRL.format(inputs.cashTotal);
   output.installmentTotal.textContent = BRL.format(inputs.installmentTotal);
   output.usedInstallment.textContent = BRL.format(inputs.usedInstallment);
