@@ -688,7 +688,7 @@ function roundMoney(value) {
 function asRate(value) {
   const parsed = parseNumber(value);
   if (parsed === null) return 0;
-  return parsed > 1 ? parsed / 100 : parsed;
+  return parsed / 100;
 }
 
 function formatInput(input, mode = "decimal") {
